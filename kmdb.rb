@@ -69,10 +69,31 @@
 
 # Delete existing data, so you'll start fresh each time this script is run.
 # Use `Model.destroy_all` code.
-# TODO!
+Studio.destroy_all
+Movie.destroy_all
+Actor.destroy_all
+Role.destroy_all
 
 # Generate models and tables, according to the domain model.
-# TODO!
+warner_bros = Studio.create!(name: "Warner Bros.")
+
+movies = [
+  { title: "Batman Begins", year_released: 2005, rated: "PG-13", studio: warner_bros },
+  { title: "The Dark Knight", year_released: 2008, rated: "PG-13", studio: warner_bros },
+  { title: "The Dark Knight Rises", year_released: 2012, rated: "PG-13", studio: warner_bros }
+]
+movies.each { |movie_data| Movie.create!(movie_data) }
+
+actors = [
+  { name: "Christian Bale" }, { name: "Michael Caine" }, { name: "Liam Neeson" },
+  { name: "Katie Holmes" }, { name: "Gary Oldman" }, { name: "Heath Ledger" },
+  { name: "Aaron Eckhart" }, { name: "Maggie Gyllenhaal" }, { name: "Tom Hardy" },
+  { name: "Joseph Gordon-Levitt" }, { name: "Anne Hathaway" }
+]
+
+actors.each { |actor_data| Actor.create!(actor_data) }
+
+Role.create!([{ movie: Movie.find_by(title: "Batman Begins"), actor: Actor.find_by(name: "Christian Bale"), character_name: "Bruce Wayne" },
 
 # Insert data into the database that reflects the sample data shown above.
 # Do not use hard-coded foreign key IDs.
@@ -84,7 +105,10 @@ puts "======"
 puts ""
 
 # Query the movies data and loop through the results to display the movies output.
-# TODO!
+Movie.all.each do |movie|
+  puts "#{movie.title} (#{movie.year_released}) - #{movie.rated} - #{movie.studio.name}"
+end
+
 
 # Prints a header for the cast output
 puts ""
@@ -93,4 +117,9 @@ puts "========"
 puts ""
 
 # Query the cast data and loop through the results to display the cast output for each movie.
-# TODO!
+Movie.all.each do |movie|
+    puts "\n#{movie.title}"
+    movie.roles.each do |role|
+      puts "#{role.actor.name} as #{role.character_name}"
+    end
+  end
