@@ -69,10 +69,18 @@
 
 # Delete existing data, so you'll start fresh each time this script is run.
 # Use `Model.destroy_all` code.
-# TODO!
+
+{Studio.destroy_all
+Movie.destroy_all
+Actor.destroy_all
+Role.destroy_all}
 
 # Generate models and tables, according to the domain model.
-# TODO!
+
+{rails generate model Studio name:text
+rails generate model Movie title:text year_released:integer rated:text studio:references
+rails generate model Actor name:text
+rails generate model Role movie:references actor:references character_name:text}
 
 # Insert data into the database that reflects the sample data shown above.
 # Do not use hard-coded foreign key IDs.
