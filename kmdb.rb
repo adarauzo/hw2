@@ -70,21 +70,86 @@
 # Delete existing data, so you'll start fresh each time this script is run.
 # Use `Model.destroy_all` code.
 
-{Studio.destroy_all
+Studio.destroy_all
 Movie.destroy_all
 Actor.destroy_all
-Role.destroy_all}
+Role.destroy_all
 
 # Generate models and tables, according to the domain model.
 
-{rails generate model Studio name:text
+rails generate model Studio name:text
 rails generate model Movie title:text year_released:integer rated:text studio:references
 rails generate model Actor name:text
-rails generate model Role movie:references actor:references character_name:text}
+rails generate model Role movie:references actor:references character_name:text
+
+rails db:migrate
+
+# app/models/studio.rb
+class Studio < ApplicationRecord
+  has_many :movies 
+end
+
+# app/models/movie.rb
+class Movie < ApplicationRecord
+  belongs_to :studio
+  has_many :roles
+end
+
+# app/models/actor.rb
+class Actor < ApplicationRecord
+  has_many :roles
+end
+
+# app/models/role.rb
+class Role < ApplicationRecord
+  belongs_to :movie
+  belongs_to :actor
+end
+
 
 # Insert data into the database that reflects the sample data shown above.
 # Do not use hard-coded foreign key IDs.
-# TODO!
+
+# Create the studio
+studio = Studio.create(name: "Warner Bros.")
+
+# Create movies with associated studio
+movies = [
+  { title: "Batman Begins", year_released: 2005, rated: "PG-13", studio: studio },
+  { title: "The Dark Knight", year_released: 2008, rated: "PG-13", studio: studio },
+  { title: "The Dark Knight Rises", year_released: 2012, rated: "PG-13", studio: studio }
+]
+Movie.create(movies)
+
+# Create actors & roles (Batman Begins)
+batman_begins = Movie.find_by(title: "Batman Begins")
+batman_begins.roles.create([
+  { actor: Actor.create(name: "Christian Bale"), character_name: "Bruce Wayne" },
+  { actor: Actor.create(name: "Michael Caine"), character_name: "Alfred" },
+  { actor: Actor.create(name: "Liam Neeson"), character_name: "Ra's Al Ghul" },
+  { actor: Actor.create(name: "Katie Holmes"), character_name: "Rachel Dawes" },
+  { actor: Actor.create(name: "Gary Oldman"), character_name: "Commissioner Gordon" }
+])
+
+# Create actors & roles (The Dark Knight)
+the_dark_knight = Movie.find_by(title: "The Dark Knight")
+the_dark_knight.roles.create([
+  { actor: Actor.create(name: "Christian Bale"), character_name: "Bruce Wayne" },
+  { actor: Actor.create(name: "Heath Ledger"), character_name: "Joker" },
+  { actor: Actor.create(name: "Aaron Eckhart"), character_name: "Harvey Dent" },
+  { actor: Actor.create(name: "Michael Caine"), character_name: "Alfred" },
+  { actor: Actor.create(name: "Maggie Gyllenhaal"), character_name: "Rachel Dawes" } 
+])
+
+# Create actors & roles (The Dark Knight Rises)
+the_dark_knight_rises = Movie.find_by(title: "The Dark Knight Rises")
+the_dark_knight_rises.roles.create([
+  { actor: Actor.create(name: "Christian Bale"), character_name: "Bruce Wayne" },
+  { actor: Actor.create(name: "Gary Oldman"), character_name: "Commissioner Gordon" },
+  { actor: Actor.create(name: "Tom Hardy"), character_name: "Bane" },
+  { actor: Actor.create(name: "Joseph Gordon-Levitt"), character_name: "John Blake" },
+  { actor: Actor.create(name: "Anne Hathaway"), character_name: "Selina Kyle" } 
+])
 
 # Prints a header for the movies output
 puts "Movies"
@@ -92,7 +157,22 @@ puts "======"
 puts ""
 
 # Query the movies data and loop through the results to display the movies output.
-# TODO!
+
+# app/controllers/movies_controller.rb
+def index
+  @movies = Movie.all  # Fetch all movies
+end
+
+# app/views/movies/index.html.erb
+<h1>All Movies</h1>
+
+<ul>
+  <% @movies.each do |movie| %>
+    <li>
+      <%= movie.title %> (<%= movie.year_released %>) - <%= movie.rated %>
+    </li>
+  <% end %>
+</ul>
 
 # Prints a header for the cast output
 puts ""
@@ -101,4 +181,21 @@ puts "========"
 puts ""
 
 # Query the cast data and loop through the results to display the cast output for each movie.
-# TODO!
+
+# app/views/movies/index.html.erb
+<h1>All Movies</h1>
+
+<ul>
+  <% @movies.each do |movie| %>
+    <li>
+      <h2><%= movie.title %> (<%= movie.year_released %>) - <%= movie.rated %></h2>
+
+      <h3>Cast</h3>
+      <ul>
+        <% movie.actors.uniq.each do |actor| %> <%# Get unique actors %>
+          <li><%= actor.name %></li>
+        <% end %>
+      </ul>
+    </li>
+  <% end %>
+</ul>
